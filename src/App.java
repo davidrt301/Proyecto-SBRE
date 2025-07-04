@@ -1,14 +1,14 @@
 import java.util.Scanner;
 
 public class App {
+
     // Variables estáticas para almacenar los datos del estudiante actual
     private static String nombreEstudiante;
     private static double nota1;
     private static double nota2;
     private static double nota3;
 
-    
-    //Método principal. Inicia el programa.
+    // Método principal. Inicia el programa.
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in); // Scanner para leer datos del usuario
         Menu(input); // Llama al menú principal
@@ -30,12 +30,12 @@ public class App {
                     2. Mostrar datos del estudiante actual
                     3. Calcular promedio de notas del estudiante actual
                     4. Validar una nota individual
+                    5. Limpiar datos del estudiante
                     0. Salir
                     """);
 
             // Lee la opción del usuario
-            var key = leerDatos(input, "Ingrese su opción:");
-            int obcion = Integer.parseInt(key);
+            var obcion =validacionObciones(input, "Ingrese su opción:");
             switch (obcion) {
                 case 1:
                     // Registrar datos de un estudiante
@@ -51,26 +51,21 @@ public class App {
                     break;
                 case 4:
                     // Validar una nota individual ingresada por el usuario
-                    double nota;
-                    while (true) {
-                        try {
-                            nota = Double.parseDouble(leerDatos(input, "Ingrese la nota a validar:"));
-                            if (validarNotaIndividual(nota)) {
-                                System.out.println("La nota es válida.");
-                                break;
-                            } else {
-                                System.out.println("La nota es inválida. Debe estar entre 0 y 100.");
-                            }
-                        } catch (NumberFormatException e) {
-                            System.out.println("Debe4 ingresar un número válido.");
-                        }
-                    }
+                    validarNota(input, "Ingrese la nota a validar:");
+                    break;
+                case 5:
+                    limpiarDatosEstudiante(input);
+                    break;
+                case 0:
+                    System.out.print("Hasta pronto.");
                     break;
                 default:
                     // Opción no válida
                     System.out.print("Opción incorrecta, vuelva e ingrese una opción válida.\n");
                     break;
             }
+            System.out.println("\nPresione ENTER para continuar");
+            input.nextLine();
             // Si el usuario elige salir, termina el ciclo
             if (obcion == 0) {
                 break;
@@ -78,10 +73,12 @@ public class App {
         }
     }
 
+    
+
     /**
      * Lee un dato del usuario mostrando un mensaje.
      * 
-     * parameto input   Scanner para leer datos
+     * parameto input Scanner para leer datos
      * parameto mensaje Mensaje a mostrar al usuario
      * return La entrada del usuario como String
      */
@@ -115,46 +112,44 @@ public class App {
     }
 
     /**
-     * Calcula y muestra el promedio de las notas del estudiante actual. Indica si el
+     * Calcula y muestra el promedio de las notas del estudiante actual. Indica si
+     * el
      * estudiante aprobó o reprobó.
      * 
      * return El promedio calculado
      */
     private static double calcularPromedioNotasEA() {
-        var promedio = (nota1 + nota2 + nota3) / 3;
-        System.out.printf("El promedio es %.3f:%n%n", promedio);
-        if (promedio <= 60) {
-            System.out.println("El estiduante " + nombreEstudiante + "ha reprobado");
-        } else {
-            System.out.println("El estiduante " + nombreEstudiante + "ha aprobado");
+        if (nombreEstudiante == null || nombreEstudiante.isEmpty()
+                || nota1 == 0.0 && nota2 == 0.0 && nota3 == 0.0) {
+            System.out.println("Por favor primero ingrese los datos del estudiante y las notas.");
+            return -1;
         }
+        var siAoR = "";
+        var promedio = (nota1 + nota2 + nota3) / 3;
+        System.out.printf("El promedio es %.2f:%n%n", promedio);
+        if (promedio <= 60) {
+            siAoR = "reprobado";
+        } else {
+            siAoR = "aprobado";
+        }
+        System.out.printf("El estudiante %s ha %s con un promedio de %.2f%n",nombreEstudiante, siAoR, promedio);
         return promedio;
-    }
-
-    /**
-     * Valida si una nota está en el rango de 0 a 100 .
-     * 
-     * parametro nota Nota a validar
-     * return true si es válida, false si no
-     */
-    private static boolean validarNotaIndividual(double nota) {
-        return nota >= 0 && nota <= 100;
     }
 
     /**
      * Solicita y valida que la nota ingresada sea un número y esté en el rango
      * válido.
      * 
-     * parametro input   Scanner para leer datos
+     * parametro input Scanner para leer datos
      * parametro mensaje Mensaje a mostrar al usuario
      * return La nota válida ingresada
      */
     private static double validarNota(Scanner input, String mensaje) {
         double nota;
-        while (true) {
+        do {
             try {
                 nota = Double.parseDouble(leerDatos(input, mensaje));
-                if (validarNotaIndividual(nota)) {
+                if (nota >= 0 && nota <= 100) {
                     System.out.println("La nota es válida.");
                     break;
                 } else {
@@ -163,14 +158,14 @@ public class App {
             } catch (NumberFormatException e) {
                 System.out.println("Debe ingresar un número válido.");
             }
-        }
+        } while (true);
         return nota;
     }
 
     /**
      * Solicita y valida que el nombre no esté vacío y tenga más de 3 caracteres.
      * 
-     * parametro input   Scanner para leer datos
+     * parametro input Scanner para leer datos
      * parametro mensaje Mensaje a mostrar al usuario
      * return El nombre válido ingresado
      */
@@ -178,6 +173,7 @@ public class App {
         String name;
         do {
             name = leerDatos(input, mensaje).trim();
+
             if (name == null || name.isEmpty() || name.length() <= 3) {
                 System.out.println(
                         "El nombre no puede estar vacío y debe tener más de 3 caracteres. Por favor, ingrese un nombre válido.");
@@ -186,4 +182,46 @@ public class App {
         return name;
     }
 
+    /**
+     * Limpia los datos del estudiante actual si el usuario confirma la acción.
+     * 
+     * parametro input Scanner para leer datos del usuario
+     */
+    private static void limpiarDatosEstudiante(Scanner input) {
+        var obcion = leerDatos(input, "escriba eliminar para eliminar los datos:");
+        if (obcion.equals("eliminar")) {
+            nombreEstudiante = null;
+            nota1 = 0.0;
+            nota2 = 0.0;
+            nota3 = 0.0;
+            System.out.println("Datos eliminados.");
+        } else {
+            System.out.println("No se eliminaron los datos. Regresando al menú...");
+        }
+    }
+
+    /**
+     * Valida que la opción ingresada por el usuario sea un número dentro del rango permitido.
+     * 
+     * parametro input Scanner para leer datos del usuario
+     * parametro mensaje Mensaje a mostrar al usuario
+     * return La opción válida seleccionada por el usuario
+     */
+    private static int validacionObciones(Scanner input, String mensaje) {
+        int obcion = -1;
+        while (true) {
+            var key = leerDatos(input, mensaje);
+            try {
+                obcion = Integer.parseInt(key);
+                if (obcion >= 0 && obcion <= 5) {
+                    break;
+                } else {
+                    System.out.println("Opción fuera de rango. Intente de nuevo.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Debe ingresar un número válido.");
+            }
+        }
+        return obcion;
+    }
 }
